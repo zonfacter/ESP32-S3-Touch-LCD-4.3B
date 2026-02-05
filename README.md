@@ -87,7 +87,3 @@ E (1163) lcd_panel.rgb: esp_lcd_new_rgb_panel(353): alloc frame buffers failed
 
 📖 **Vollständige Anleitung**: [setup.md](setup.md)  
 🔧 **Probleme?**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
----
-
-**Hinweis**: Bei Speicherproblemen (ESP_ERR_NO_MEM) ist PSRAM-Aktivierung in den Arduino IDE Board-Einstellungen zwingend erforderlich!
