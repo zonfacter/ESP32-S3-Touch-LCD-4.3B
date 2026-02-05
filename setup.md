@@ -71,6 +71,107 @@ Port: "COM6" (je nach System)
 
 ---
 
+## 🔧 LVGL Konfiguration für Arduino
+
+### `lv_conf.h` Platzierung (WICHTIG!)
+
+LVGL benötigt eine `lv_conf.h` Datei zur Konfiguration. Für Arduino gibt es zwei empfohlene Methoden:
+
+#### **Methode 1: Im Arduino Libraries-Ordner (Empfohlen)**
+
+Die zuverlässigste Methode für Arduino IDE:
+
+1. Kopiere die mitgelieferte `lv_conf.h` in deinen Arduino-Bibliotheksordner:
+   - **Windows**: `C:\Users\<DeinBenutzername>\Documents\Arduino\libraries\lv_conf.h`
+   - **macOS**: `~/Documents/Arduino/libraries/lv_conf.h`
+   - **Linux**: `~/Arduino/libraries/lv_conf.h`
+
+2. Die Datei sollte **außerhalb** des `lvgl`-Ordners liegen, auf gleicher Ebene:
+   ```
+   Arduino/
+   └── libraries/
+       ├── lv_conf.h          ← Hier platzieren
+       ├── lvgl/
+       │   └── ...
+       └── ESP32_Display_Panel/
+           └── ...
+   ```
+
+3. Stelle sicher, dass `lv_conf.h` mit `#if 1` beginnt (nicht `#if 0`)
+
+#### **Methode 2: Im Sketch-Ordner**
+
+Alternativ kannst du `lv_conf.h` direkt in deinen Sketch-Ordner legen:
+
+```
+DeinSketch/
+├── DeinSketch.ino
+├── lv_conf.h              ← Hier platzieren
+├── lvgl_v8_port.h
+└── lvgl_v8_port.cpp
+```
+
+### Wichtige LVGL-Einstellungen
+
+Stelle sicher, dass diese Fonts in deiner `lv_conf.h` aktiviert sind:
+
+```c
+#define LV_FONT_MONTSERRAT_14  1
+#define LV_FONT_MONTSERRAT_16  1
+#define LV_FONT_MONTSERRAT_18  1
+#define LV_FONT_MONTSERRAT_20  1
+#define LV_FONT_MONTSERRAT_24  1
+#define LV_FONT_MONTSERRAT_30  1
+```
+
+Für Demos aktiviere:
+```c
+#define LV_USE_DEMO_WIDGETS    1
+```
+
+---
+
+## 🔄 Migration zu aktueller API (wichtig!)
+
+Die Beispiele in diesem Repository verwenden die **aktuelle, nicht-veraltete API**. Vermeide Deprecation-Warnungen:
+
+### Richtige Include-Anweisung
+
+```cpp
+#include <esp_display_panel.hpp>  // RICHTIG
+// NICHT: #include <ESP_Panel_Library.h>  ← veraltet!
+```
+
+### Richtige Typen und Namespaces
+
+```cpp
+using namespace esp_panel::drivers;
+using namespace esp_panel::board;
+
+void setup() {
+    // Board verwenden, nicht ESP_Panel
+    Board *board = new Board();  // RICHTIG
+    // NICHT: ESP_Panel *panel = new ESP_Panel();  ← veraltet!
+    
+    board->init();
+    board->begin();
+    
+    // getLCD() verwenden, nicht getLcd()
+    lvgl_port_init(board->getLCD(), board->getTouch());  // RICHTIG
+    // NICHT: lvgl_port_init(board->getLcd(), ...);  ← veraltet!
+}
+```
+
+### Migrations-Tabelle
+
+| Veraltet (Deprecated) | Verwende stattdessen |
+|----------------------|----------------------|
+| `#include <ESP_Panel_Library.h>` | `#include <esp_display_panel.hpp>` |
+| `ESP_Panel` | `esp_panel::board::Board` |
+| `panel->getLcd()` | `panel->getLCD()` |
+
+---
+
 ## ⚙️ Konfigurationsdateien
 
 ### 1. `esp_panel_board_custom_conf.h`
@@ -285,6 +386,100 @@ rst:0xc (RTC_SW_CPU_RST)
 - Deinstalliere LVGL 9.x
 - Installiere LVGL 8.3.x (z.B. 8.3.11)
 - Arduino IDE neu starten
+
+### Problem: Fatal Error "lv_conf.h: No such file or directory"
+
+**Symptome:**
+```
+fatal error: ../../lv_conf.h: No such file or directory
+#include "../../lv_conf.h"
+compilation terminated.
+```
+
+**Lösungen:**
+1. ✅ **Methode 1**: Kopiere `lv_conf.h` in den Arduino Libraries-Ordner
+   - Windows: `C:\Users\<DeinName>\Documents\Arduino\libraries\lv_conf.h`
+   - macOS/Linux: `~/Documents/Arduino/libraries/lv_conf.h`
+   - Die Datei muss **neben** dem `lvgl`-Ordner liegen, nicht darin!
+
+2. ✅ **Methode 2**: Kopiere `lv_conf.h` in deinen Sketch-Ordner
+   - Platziere die Datei im gleichen Ordner wie deine `.ino`-Datei
+
+3. ✅ Stelle sicher, dass die erste Zeile in `lv_conf.h` ist:
+   ```c
+   #if 1  // NICHT #if 0 !
+   ```
+
+4. ✅ Arduino IDE neu starten nach Platzierung der Datei
+
+### Problem: Deprecation-Warnungen
+
+**Symptome:**
+```
+warning: "This file is Deprecated. Please use the `esp_display_panel.hpp` file instead."
+warning: 'using ESP_Panel = class esp_panel::board::Board' is deprecated
+warning: 'esp_panel::drivers::LCD* esp_panel::board::Board::getLcd()' is deprecated: Use `getLCD()` instead
+```
+
+**Lösungen:**
+
+1. ✅ **Header aktualisieren:**
+   ```cpp
+   // Alt (deprecated):
+   #include <ESP_Panel_Library.h>
+   
+   // Neu (korrekt):
+   #include <esp_display_panel.hpp>
+   ```
+
+2. ✅ **Typ-Alias aktualisieren:**
+   ```cpp
+   // Alt (deprecated):
+   ESP_Panel* panel = new ESP_Panel();
+   
+   // Neu (korrekt):
+   using namespace esp_panel::board;
+   Board* panel = new Board();
+   ```
+
+3. ✅ **Methoden-Namen aktualisieren:**
+   ```cpp
+   // Alt (deprecated):
+   panel->getLcd()
+   
+   // Neu (korrekt):
+   panel->getLCD()
+   ```
+
+4. ✅ Siehe auch Abschnitt "Migration zu aktueller API" oben für vollständige Migrations-Tabelle
+
+### Problem: Warning "esp_panel_board_custom_conf.h version is outdated"
+
+**Symptome:**
+```
+warning: "The `esp_panel_board_custom_conf.h` file version is outdated. Some new configurations are missing"
+```
+
+**Hinweis:**
+Diese Warnung ist informativ und kann in der Regel ignoriert werden, wenn dein Board korrekt funktioniert. Sie bedeutet, dass die ESP32_Display_Panel-Bibliothek neuere Konfigurationsoptionen unterstützt, die in deiner Konfig-Datei noch nicht vorhanden sind. Solange das Display und Touch funktionieren, ist keine Aktion erforderlich.
+
+### Problem: Fehler "lv_font_montserrat_XX not declared"
+
+**Symptome:**
+```
+error: 'lv_font_montserrat_24' was not declared in this scope
+```
+
+**Lösung:**
+Aktiviere die benötigten Fonts in `lv_conf.h`:
+```c
+#define LV_FONT_MONTSERRAT_14  1
+#define LV_FONT_MONTSERRAT_16  1
+#define LV_FONT_MONTSERRAT_18  1
+#define LV_FONT_MONTSERRAT_20  1
+#define LV_FONT_MONTSERRAT_24  1
+#define LV_FONT_MONTSERRAT_30  1
+```
 
 ---
 

@@ -12,7 +12,7 @@
 
 #include <Arduino.h>
 #include <lvgl.h>
-#include <ESP_Panel_Library.h>
+#include <esp_display_panel.hpp>
 #include <functional>
 #include "lvgl_v8_port.h"
 #include "../core/bms_data_types.h"
@@ -65,7 +65,7 @@ private:
     lv_obj_t* m_timeoutDropdown;
     
     // Panel Referenz für Backlight-Steuerung
-    ESP_Panel* m_panel;
+    esp_panel::board::Board* m_panel;
     
     // CAN Config Widgets
     lv_obj_t* m_canBaudrateDropdown;
@@ -173,7 +173,7 @@ public:
     }
     
     bool init();
-    void setPanel(ESP_Panel* panel) { m_panel = panel; }
+    void setPanel(esp_panel::board::Board* panel) { m_panel = panel; }
     void createAllScreens();
     void switchToScreen(Screen screen);
     Screen getCurrentScreen() const { return m_currentScreen; }
