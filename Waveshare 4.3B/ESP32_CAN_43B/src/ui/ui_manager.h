@@ -855,7 +855,7 @@ void UIManager::applyTheme() {
     // LVGL Theme anwenden
     lv_disp_t* disp = lv_disp_get_default();
     if (!disp) {
-        Serial.println("[UI] ERROR: No LVGL display available for theme change");
+        Serial.println("[UI] ERROR: No LVGL display initialized; cannot apply theme change");
         lvgl_port_unlock();
         return;
     }
@@ -869,7 +869,7 @@ void UIManager::applyTheme() {
     );
     
     if (!theme) {
-        Serial.println("[UI] ERROR: Theme initialization failed");
+        Serial.println("[UI] ERROR: Theme initialization failed (insufficient memory or unsupported display)");
         lvgl_port_unlock();
         return;
     }
