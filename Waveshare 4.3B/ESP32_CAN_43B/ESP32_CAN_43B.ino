@@ -13,8 +13,11 @@
 // 
 
 #include <Arduino.h>
-#include <ESP_Panel_Library.h>
+#include <esp_display_panel.hpp>
 #include <lvgl.h>
+
+using namespace esp_panel::drivers;
+using namespace esp_panel::board;
 
 // Core Includes
 #include "src/core/bms_data_types.h"
@@ -39,7 +42,7 @@
 
 // Hardware
 CanDriver canDriver;
-ESP_Panel* panel = nullptr;
+Board* panel = nullptr;
 
 // Protokolle
 PylontechCan pylontechProtocol;
@@ -156,7 +159,7 @@ bool initDisplay() {
     Serial.println("[Display] Initializing ESP_Panel...");
     
     // ESP Panel erstellen und initialisieren
-    panel = new ESP_Panel();
+    panel = new Board();
     
     if (!panel) {
         Serial.println("[Display] ERROR: Failed to create panel!");
@@ -180,7 +183,7 @@ bool initDisplay() {
     
     // LVGL Port initialisieren
     Serial.println("[Display] Initializing LVGL port...");
-    if (!lvgl_port_init(panel->getLcd(), panel->getTouch())) {
+    if (!lvgl_port_init(panel->getLCD(), panel->getTouch())) {
         Serial.println("[Display] ERROR: LVGL port init failed!");
         return false;
     }
