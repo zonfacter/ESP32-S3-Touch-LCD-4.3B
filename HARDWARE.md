@@ -34,10 +34,26 @@ Das **Waveshare ESP32-S3-Touch-LCD-4.3B** ist ein kompaktes, vielseitiges Develo
 | **AI Beschleunigung** | Vektor-Instruktionen für ML |
 | **FPU** | Single-precision FPU |
 
-### ⚠️ WICHTIG: PSRAM
-Das Board verfügt über **8MB PSRAM**, welches **zwingend aktiviert** werden muss:
-- Arduino IDE: `Tools → PSRAM → "OPI PSRAM"`
-- Ohne PSRAM-Aktivierung schlägt die LCD-Initialisierung mit `ESP_ERR_NO_MEM` fehl!
+### ⚠️ KRITISCH: PSRAM AKTIVIERUNG
+Das Board verfügt über **8MB PSRAM**, welches **ZWINGEND in Arduino IDE aktiviert** werden muss:
+
+**Arduino IDE Einstellung:**
+```
+Tools → Board: "ESP32S3 Dev Module"
+Tools → PSRAM: "OPI PSRAM"  ← ⚠️ MUSS AKTIVIERT SEIN!
+```
+
+**Ohne PSRAM-Aktivierung:**
+- ❌ LCD-Initialisierung schlägt mit `ESP_ERR_NO_MEM` fehl
+- ❌ Fehlermeldung: "no mem for frame buffer"
+- ❌ Display bleibt schwarz oder funktioniert nicht
+
+**Mit PSRAM-Aktivierung:**
+- ✅ Voller Zugriff auf 8MB zusätzlichen Speicher
+- ✅ LCD Frame-Buffer können korrekt allokiert werden
+- ✅ Display funktioniert einwandfrei
+
+➡️ Siehe [TROUBLESHOOTING.md](TROUBLESHOOTING.md#-lcd-panel-initialisierungsfehler-esp_err_no_mem) für Details
 
 ---
 
