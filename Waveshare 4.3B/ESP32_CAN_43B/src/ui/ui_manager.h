@@ -252,8 +252,8 @@ UIManager::UIManager()
     , m_wlanPassInput(nullptr)
     , m_wlanConnectBtn(nullptr)
     , m_wlanStatusLabel(nullptr)
-    , m_wlanIPLabel(nullptr)
     , m_panel(nullptr)
+    , m_wlanIPLabel(nullptr)
     , m_brightnessLevel(80)
     , m_themeDark(false)  // Standard: Light Theme (false = light, true = dark)
     , m_screenTimeout(10)
@@ -383,23 +383,23 @@ void UIManager::createMainScreen() {
     lv_obj_set_style_pad_gap(cont, 15, 0);
     
     // BMS Data Button
-    lv_obj_t* btn = createButton(cont, LV_SYMBOL_BATTERY_3 "\nBMS DATA", 0, 0, 220, 120, 
+    createButton(cont, LV_SYMBOL_BATTERY_3 "\nBMS DATA", 0, 0, 220, 120, 
                                 btnBmsDataEventCb, 0xFF8800);
     
     // CAN Button
-    btn = createButton(cont, LV_SYMBOL_CALL "\nCAN", 0, 0, 220, 120, btnCanEventCb, 0x0066CC);
+    createButton(cont, LV_SYMBOL_CALL "\nCAN", 0, 0, 220, 120, btnCanEventCb, 0x0066CC);
     
     // RS485 Button
-    btn = createButton(cont, LV_SYMBOL_USB "\nRS485", 0, 0, 220, 120, btnRs485EventCb, 0x00AA00);
+    createButton(cont, LV_SYMBOL_USB "\nRS485", 0, 0, 220, 120, btnRs485EventCb, 0x00AA00);
     
     // MQTT Button
-    btn = createButton(cont, LV_SYMBOL_WIFI "\nMQTT", 0, 0, 220, 120, btnMqttEventCb, 0x9C27B0);
+    createButton(cont, LV_SYMBOL_WIFI "\nMQTT", 0, 0, 220, 120, btnMqttEventCb, 0x9C27B0);
     
     // WLAN Button
-    btn = createButton(cont, LV_SYMBOL_WIFI "\nWLAN", 0, 0, 220, 120, btnWlanEventCb, 0x2196F3);
+    createButton(cont, LV_SYMBOL_WIFI "\nWLAN", 0, 0, 220, 120, btnWlanEventCb, 0x2196F3);
     
     // Display Button
-    btn = createButton(cont, LV_SYMBOL_SETTINGS "\nDISPLAY", 0, 0, 220, 120, btnDisplayEventCb, 0x607D8B);
+    createButton(cont, LV_SYMBOL_SETTINGS "\nDISPLAY", 0, 0, 220, 120, btnDisplayEventCb, 0x607D8B);
 }
 
 // ============================================================================
@@ -1127,11 +1127,9 @@ void UIManager::mqttConnectEventCb(lv_event_t* e) {
     
     const char* server = lv_textarea_get_text(ui->m_mqttServerInput);
     int32_t port = lv_spinbox_get_value(ui->m_mqttPortSpinbox);
-    const char* user = lv_textarea_get_text(ui->m_mqttUserInput);
-    const char* pass = lv_textarea_get_text(ui->m_mqttPassInput);
     const char* topic = lv_textarea_get_text(ui->m_mqttTopicInput);
     
-    Serial.printf("[UI] MQTT Config: %s:%d, topic: %s\n", server, port, topic);
+    Serial.printf("[UI] MQTT Config: %s:%ld, topic: %s\n", server, port, topic);
     ui->updateMqttStatus("MQTT not yet implemented");
 }
 
@@ -1143,7 +1141,6 @@ void UIManager::wlanConnectEventCb(lv_event_t* e) {
     Serial.println("[UI] WLAN Connect clicked");
     
     const char* ssid = lv_textarea_get_text(ui->m_wlanSSIDInput);
-    const char* pass = lv_textarea_get_text(ui->m_wlanPassInput);
     
     Serial.printf("[UI] WLAN Config: SSID=%s\n", ssid);
     ui->updateWlanStatus("WLAN not yet implemented");
