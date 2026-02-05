@@ -169,9 +169,25 @@ bool initDisplay() {
     // Panel initialisieren
     panel->init();
     
-    // Hinweis: Frame Buffer Anzahl wird automatisch durch die Board-Konfiguration gesetzt
-    // Die esp_panel_board_custom_conf.h definiert bereits die korrekten Buffer
-    Serial.println("[Display] Using board-configured frame buffers (2x for Direct Mode)");
+    #if LVGL_PORT_AVOID_TEARING_MODE
+    auto lcd = panel->getLCD();
+    // When avoid tearing function is enabled, the frame buffer number should be set in the board driver
+    lcd->configFrameBufferNumber(LVGL_PORT_DISP_BUFFER_NUM);
+    Serial.printf("[Display] Configured %d frame buffers for avoid tearing mode %d\n", 
+                  LVGL_PORT_DISP_BUFFER_NUM, LVGL_PORT_AVOID_TEARING_MODE);
+#if ESP_PANEL_DRIVERS_BUS_ENABLE_RGB && CONFIG_IDF_TARGET_ESP32S3
+    auto lcd_bus = lcd->getBus();
+    /**
+     * As the anti-tearing feature typically consumes more PSRAM bandwidth, for the ESP32-S3, we need to utilize the
+     * "bounce buffer" functionality to enhance the RGB data bandwidth.
+     * This feature will consume `bounce_buffer_size * bytes_per_pixel * 2` of SRAM memory.
+     */
+    if (lcd_bus->getBasicAttributes().type == ESP_PANEL_BUS_TYPE_RGB) {
+        static_cast<BusRGB *>(lcd_bus)->configRGB_BounceBufferSize(lcd->getFrameWidth() * 10);
+        Serial.println("[Display] Configured RGB bounce buffer");
+    }
+#endif
+#endif
     
     // Panel starten
     if (!panel->begin()) {

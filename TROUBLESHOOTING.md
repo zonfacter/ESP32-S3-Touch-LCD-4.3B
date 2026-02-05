@@ -103,6 +103,113 @@ public:
 
 ---
 
+## 🔴 Hintergrundbeleuchtung reagiert nicht / Dark Theme Crash
+
+### Problem
+```
+[UI] Brightness set to 80%
+E (1586) lcd_panel.rgb: esp_lcd_rgb_panel_get_frame_buffer(450): invalid frame buffer number
+[E][Panel][esp_panel_lcd.cpp:0991](getFrameBufferByIndex): Get RGB buffer failed [ESP_ERR_INVALID_ARG]
+Guru Meditation Error: Core 1 panic'ed (LoadProhibited). Exception was unhandled.
+```
+
+**Symptome:**
+- Helligkeits-Slider lässt sich bewegen, aber die Helligkeit ändert sich nicht
+- Umschalten auf Dark Theme führt zum Crash und Reboot
+
+### Ursache
+
+**Problem 1 - Hintergrundbeleuchtung:**
+Das Board verwendet einen CH422G IO-Expander für die Backlight-Steuerung auf Pin 2. Dieser unterstützt **nur ON/OFF**, keine PWM-Helligkeitsregelung.
+
+**Problem 2 - Dark Theme Crash:**
+Die Frame-Buffer-Anzahl muss vor dem Zugriff auf die Buffers konfiguriert werden, wenn Avoid-Tearing-Mode aktiviert ist.
+
+### ✅ Lösung
+
+#### 1. Backlight-Konfiguration korrigieren
+
+In `esp_panel_board_custom_conf.h`:
+
+```cpp
+// KORREKT: Nur ON/OFF möglich
+#define ESP_PANEL_BOARD_BACKLIGHT_TYPE  (ESP_PANEL_BACKLIGHT_TYPE_SWITCH_EXPANDER)
+
+// FALSCH: PWM nicht unterstützt
+// #define ESP_PANEL_BOARD_BACKLIGHT_TYPE  (ESP_PANEL_BACKLIGHT_TYPE_PWM_LEDC)
+```
+
+#### 2. UI-Code anpassen
+
+In `ui_manager.h`, Funktion `setBrightness()`:
+
+```cpp
+void UIManager::setBrightness(int level) {
+    m_brightnessLevel = level;
+    
+    if (m_panel) {
+        auto backlight = m_panel->getBacklight();
+        if (backlight) {
+            // Hardware unterstützt nur ON/OFF
+            if (level > 0) {
+                backlight->on();  // Backlight AN
+                Serial.printf("[UI] Backlight turned ON (level: %d%%)\n", level);
+            } else {
+                backlight->off(); // Backlight AUS
+                Serial.println("[UI] Backlight turned OFF");
+            }
+        }
+    }
+}
+```
+
+#### 3. Frame Buffer Konfiguration hinzufügen
+
+Beim Initialisieren des Panels (in `setup()` oder `initDisplay()`):
+
+```cpp
+board->init();
+
+#if LVGL_PORT_AVOID_TEARING_MODE
+auto lcd = board->getLCD();
+// Frame Buffer Anzahl konfigurieren BEVOR getFrameBufferByIndex() aufgerufen wird
+lcd->configFrameBufferNumber(LVGL_PORT_DISP_BUFFER_NUM);
+Serial.printf("[Display] Configured %d frame buffers\n", LVGL_PORT_DISP_BUFFER_NUM);
+
+#if ESP_PANEL_DRIVERS_BUS_ENABLE_RGB && CONFIG_IDF_TARGET_ESP32S3
+auto lcd_bus = lcd->getBus();
+if (lcd_bus->getBasicAttributes().type == ESP_PANEL_BUS_TYPE_RGB) {
+    static_cast<BusRGB *>(lcd_bus)->configRGB_BounceBufferSize(lcd->getFrameWidth() * 10);
+    Serial.println("[Display] Configured RGB bounce buffer");
+}
+#endif
+#endif
+
+board->begin();
+```
+
+#### 4. Benutzer informieren
+
+Füge einen Hinweis in der UI hinzu:
+
+```cpp
+lv_obj_t* noteLabel = lv_label_create(cont);
+lv_label_set_text(noteLabel, "(Nur AN/AUS - Hardware-Limitation)");
+lv_obj_set_style_text_color(noteLabel, lv_palette_main(LV_PALETTE_ORANGE), 0);
+```
+
+### Hardware-Limitation verstehen
+
+Das Waveshare ESP32-S3-Touch-LCD-4.3B Board verwendet:
+- **CH422G IO-Expander** für Backlight-Steuerung
+- **Pin 2 des Expanders** für Backlight
+- CH422G unterstützt **keine PWM-Ausgabe**
+- Nur **digitale ON/OFF** Schaltung möglich
+
+Wenn PWM-Helligkeitsregelung gewünscht wird, muss die Hardware modifiziert werden, um das Backlight an einen PWM-fähigen GPIO anzuschließen.
+
+---
+
 ## 📚 Weitere Ressourcen
 
 - **Hardware Details**: [HARDWARE.md](HARDWARE.md)
