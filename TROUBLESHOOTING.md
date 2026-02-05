@@ -6,6 +6,8 @@ Lösungen für häufige Probleme und Fehler beim Entwickeln mit dem Waveshare ES
 
 ## 🔴 LCD Panel Initialisierungsfehler: ESP_ERR_NO_MEM
 
+### ⚠️ HÄUFIGSTER FEHLER - PSRAM NICHT AKTIVIERT!
+
 ### Problem
 ```
 E (1162) lcd_panel.rgb: lcd_rgb_panel_alloc_frame_buffers(165): no mem for frame buffer
@@ -18,23 +20,31 @@ E (1163) lcd_panel.rgb: esp_lcd_new_rgb_panel(353): alloc frame buffers failed
 **Siehe auch**: [Issue #5](https://github.com/zonfacter/ESP32-S3-Touch-LCD-4.3B/issues/5)
 
 ### Ursache
+⚠️ **In den meisten Fällen**: PSRAM wurde in Arduino IDE nicht aktiviert!
+
 Der ESP32-S3 hat nicht genügend Arbeitsspeicher für die LCD-Frame-Buffer. Das 800×480 RGB Display benötigt große Speicherbereiche, die nur im externen PSRAM verfügbar sind.
 
-### ✅ Lösung
+### ✅ Lösung: PSRAM AKTIVIEREN
 
-#### 1. PSRAM in Arduino IDE aktivieren
+#### 1. PSRAM in Arduino IDE aktivieren (KRITISCH!)
 
-**Kritische Board-Einstellungen:**
+**Schritt-für-Schritt:**
 
-```
-Tools → Board: "ESP32S3 Dev Module"
-Tools → PSRAM: "OPI PSRAM"  ← MUSS aktiviert sein!
-Tools → Partition Scheme: "Huge APP (3MB No OTA/1MB SPIFFS)"
-Tools → Flash Mode: "QIO 80MHz"
-Tools → Flash Size: "16MB (128Mb)"
-Tools → Upload Speed: "921600"
-Tools → USB CDC On Boot: "Disabled"
-```
+1. **Arduino IDE öffnen**
+2. **Board auswählen**: `Tools → Board → "ESP32S3 Dev Module"`
+3. ⚠️ **PSRAM AKTIVIEREN**: `Tools → PSRAM → "OPI PSRAM"` 
+   - Dies ist der wichtigste Schritt!
+   - Ohne PSRAM: ESP_ERR_NO_MEM Fehler garantiert!
+4. **Weitere Einstellungen**:
+   ```
+   Tools → Partition Scheme: "Huge APP (3MB No OTA/1MB SPIFFS)"
+   Tools → Flash Mode: "QIO 80MHz"
+   Tools → Flash Size: "16MB (128Mb)"
+   Tools → Upload Speed: "921600"
+   Tools → USB CDC On Boot: "Disabled"
+   ```
+
+**Wichtig**: Alle Einstellungen müssen VOR dem Upload konfiguriert werden!
 
 #### 2. PlatformIO Konfiguration
 

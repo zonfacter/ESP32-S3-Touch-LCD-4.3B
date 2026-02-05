@@ -222,6 +222,23 @@ bool initializeSystem() {
     Serial.println("    Waveshare ESP32-S3-Touch-LCD-4.3B");
     Serial.println("========================================\n");
     
+    // Schritt 0: PSRAM Check (KRITISCH!)
+    Serial.println("[Init] Step 0: PSRAM Check...");
+    if (!psramFound()) {
+        Serial.println("========================================");
+        Serial.println("ERROR: PSRAM NOT FOUND!");
+        Serial.println("========================================");
+        Serial.println("PSRAM must be enabled in Arduino IDE:");
+        Serial.println("Tools → PSRAM → \"OPI PSRAM\"");
+        Serial.println("");
+        Serial.println("Without PSRAM, LCD initialization will fail!");
+        Serial.println("See README.md for complete setup instructions.");
+        Serial.println("========================================");
+        // Halt execution - system cannot continue without PSRAM
+        esp_deep_sleep_start();
+    }
+    Serial.printf("[Init] PSRAM OK: %d bytes total, %d bytes free\n", ESP.getPsramSize(), ESP.getFreePsram());
+    
     // Schritt 1: Display initialisieren
     Serial.println("[Init] Step 1: Display...");
     if (!initDisplay()) {

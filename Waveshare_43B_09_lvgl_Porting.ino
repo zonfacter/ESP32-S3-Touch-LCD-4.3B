@@ -18,6 +18,24 @@ void setup()
     String title = "LVGL porting example";
 
     Serial.begin(115200);
+    
+    // Check if PSRAM is enabled - CRITICAL for LCD initialization!
+    if (!psramFound()) {
+        Serial.println("========================================");
+        Serial.println("ERROR: PSRAM NOT FOUND!");
+        Serial.println("========================================");
+        Serial.println("PSRAM must be enabled in Arduino IDE:");
+        Serial.println("Tools → PSRAM → \"OPI PSRAM\"");
+        Serial.println("");
+        Serial.println("Without PSRAM, LCD initialization will fail!");
+        Serial.println("See README.md for complete setup instructions.");
+        Serial.println("========================================");
+        // Halt execution - system cannot continue without PSRAM
+        esp_deep_sleep_start();
+    }
+    Serial.println("========================================");
+    Serial.printf("PSRAM OK: %d bytes total, %d bytes free\n", ESP.getPsramSize(), ESP.getFreePsram());
+    Serial.println("========================================");
 
     Serial.println("Initializing board");
     Board *board = new Board();

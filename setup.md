@@ -2,6 +2,22 @@
 
 Vollständige Konfigurationsanleitung für LVGL-Projekte mit dem Waveshare ESP32-S3-Touch-LCD-4.3B Display.
 
+---
+
+## ⚠️ WICHTIG: PSRAM AKTIVIERUNG ERFORDERLICH!
+
+**Das LCD-Panel wird NICHT funktionieren ohne PSRAM-Aktivierung!**
+
+Der häufigste Fehler ist das Vergessen der PSRAM-Aktivierung in Arduino IDE. Dies führt zu:
+```
+E (1162) lcd_panel.rgb: lcd_rgb_panel_alloc_frame_buffers(165): no mem for frame buffer
+[E][Panel] Create refresh panel failed [ESP_ERR_NO_MEM]
+```
+
+✅ **Lösung**: `Tools → PSRAM → "OPI PSRAM"` aktivieren (siehe unten für Details)
+
+---
+
 ## 📋 Hardware-Spezifikationen
 
 | Komponente | Spezifikation |
@@ -41,7 +57,7 @@ Port: "COM6" (je nach System)
 | **Arduino Runs On** | `Core 1` | Standard Arduino Core |
 | **USB Firmware MSC On Boot** | `Disabled` | Kein MSC-Modus |
 | **Partition Scheme** | `Huge APP (3MB No OTA/1MB SPIFFS)` | Mehr App-Speicher |
-| **PSRAM** | `Enabled` | **WICHTIG!** OPI PSRAM aktivieren |
+| **PSRAM** | `OPI PSRAM` | ⚠️ **KRITISCH!** Ohne PSRAM → ESP_ERR_NO_MEM Fehler! |
 | **Upload Mode** | `UART0 / Hardware CDC` | Standard Upload |
 | **Upload Speed** | `921600` | Schneller Upload |
 | **USB Mode** | `Hardware CDC and JTAG` | Debug-Unterstützung |
@@ -501,7 +517,7 @@ Waveshare_43B_LVGL_Project/
 
 - [ ] Arduino IDE mit ESP32-Board-Support installiert
 - [ ] Waveshare ESP32-S3-Touch-LCD-4.3B Board ausgewählt
-- [ ] **PSRAM aktiviert** (kritisch!)
+- [ ] ⚠️ **PSRAM auf "OPI PSRAM" aktiviert** (KRITISCH! Ohne dies: ESP_ERR_NO_MEM)
 - [ ] Partition Scheme: "Huge APP (3MB No OTA/1MB SPIFFS)"
 - [ ] Bibliotheken installiert:
   - [ ] ESP32_Display_Panel

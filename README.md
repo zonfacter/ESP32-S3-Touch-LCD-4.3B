@@ -1,3 +1,24 @@
+## ⚠️ KRITISCH: PSRAM MUSS AKTIVIERT SEIN!
+
+**Bevor Sie beginnen**: Das LCD-Panel **wird nicht funktionieren** ohne PSRAM-Aktivierung in der Arduino IDE!
+
+### Arduino IDE Einstellung (ZWINGEND ERFORDERLICH)
+```
+Tools → Board: "ESP32S3 Dev Module"
+Tools → PSRAM: "OPI PSRAM"  ← ⚠️ MUSS AKTIVIERT SEIN!
+```
+
+**Ohne diese Einstellung erhalten Sie folgenden Fehler:**
+```
+E (1162) lcd_panel.rgb: lcd_rgb_panel_alloc_frame_buffers(165): no mem for frame buffer
+E (1163) lcd_panel.rgb: esp_lcd_new_rgb_panel(353): alloc frame buffers failed
+[E][Panel] Create refresh panel failed [ESP_ERR_NO_MEM]
+```
+
+➡️ **Lösung**: Siehe [Setup-Anleitung](setup.md) und [Troubleshooting Guide](TROUBLESHOOTING.md#-lcd-panel-initialisierungsfehler-esp_err_no_mem)
+
+---
+
 ## Technische Spezifikationen (Waveshare ESP32-S3-Touch-LCD-4.3B)
 
 ### Prozessor & Speicher
@@ -6,7 +27,7 @@
   - Vector Instructions für AI-Beschleunigung
   - 384KB ROM, 512KB RAM
 - **Flash**: 16MB
-- **PSRAM**: 8MB (MUSS in Arduino IDE aktiviert sein!)
+- **PSRAM**: 8MB (⚠️ MUSS in Arduino IDE aktiviert sein!)
 
 ### Display & Touch
 - **Display**: 4.3" kapazitives Touchscreen
@@ -55,4 +76,14 @@
 
 ---
 
-**Hinweis**: Bei Speicherproblemen (ESP_ERR_NO_MEM) ist PSRAM-Aktivierung in den Arduino IDE Board-Einstellungen zwingend erforderlich!
+## 🚀 Schnellstart
+
+1. ✅ **Arduino IDE öffnen**
+2. ✅ **Board wählen**: `Tools → Board → ESP32S3 Dev Module`
+3. ⚠️ **PSRAM AKTIVIEREN**: `Tools → PSRAM → OPI PSRAM` ← **KRITISCH!**
+4. ✅ **Partition Scheme**: `Tools → Partition Scheme → Huge APP (3MB No OTA/1MB SPIFFS)`
+5. ✅ **Bibliotheken installieren**: ESP32_Display_Panel, LVGL 8.3.x
+6. ✅ **Code hochladen und testen**
+
+📖 **Vollständige Anleitung**: [setup.md](setup.md)  
+🔧 **Probleme?**: [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
