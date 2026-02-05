@@ -662,6 +662,13 @@ void UIManager::createDisplayScreen() {
     // Brightness
     createLabel(cont, "Helligkeit:", 20, y, 20);
     
+    // HINWEIS: Hardware limitation - nur ON/OFF möglich
+    lv_obj_t* noteLabel = lv_label_create(cont);
+    lv_label_set_text(noteLabel, "(Nur AN/AUS - Hardware-Limitation)");
+    lv_obj_set_pos(noteLabel, 200, y - 20);
+    lv_obj_set_style_text_font(noteLabel, &lv_font_montserrat_12, 0);
+    lv_obj_set_style_text_color(noteLabel, lv_palette_main(LV_PALETTE_ORANGE), 0);
+    
     m_brightnessSlider = lv_slider_create(cont);
     lv_obj_set_size(m_brightnessSlider, 450, 25);
     lv_obj_set_pos(m_brightnessSlider, 200, y + 5);
@@ -816,9 +823,16 @@ void UIManager::setBrightness(int level) {
         // Backlight über Panel steuern
         auto backlight = m_panel->getBacklight();
         if (backlight) {
-            // Helligkeit von 0-100% setzen
-            backlight->setBrightness(level);
-            Serial.printf("[UI] Brightness set to %d%%\n", level);
+            // WICHTIG: Das Board verwendet einen SWITCH_EXPANDER Backlight-Typ,
+            // der nur ON/OFF unterstützt, KEINE PWM-Helligkeitsregelung.
+            // Daher: level > 0 = ON, level == 0 = OFF
+            if (level > 0) {
+                backlight->on();
+                Serial.printf("[UI] Backlight turned ON (requested level: %d%%)\n", level);
+            } else {
+                backlight->off();
+                Serial.println("[UI] Backlight turned OFF");
+            }
         } else {
             Serial.println("[UI] WARNING: Backlight not available");
         }
