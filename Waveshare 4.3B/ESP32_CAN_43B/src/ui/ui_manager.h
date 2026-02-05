@@ -880,13 +880,34 @@ void UIManager::applyTheme() {
     Screen currentScreen = m_currentScreen;
     
     // Screens neu erstellen mit neuem Theme
-    if (m_mainScreen) lv_obj_del_async(m_mainScreen);
-    if (m_bmsDataScreen) lv_obj_del_async(m_bmsDataScreen);
-    if (m_canScreen) lv_obj_del_async(m_canScreen);
-    if (m_rs485Screen) lv_obj_del_async(m_rs485Screen);
-    if (m_mqttScreen) lv_obj_del_async(m_mqttScreen);
-    if (m_wlanScreen) lv_obj_del_async(m_wlanScreen);
-    if (m_displayScreen) lv_obj_del_async(m_displayScreen);
+    if (m_mainScreen) {
+        lv_obj_del_async(m_mainScreen);
+        m_mainScreen = nullptr;
+    }
+    if (m_bmsDataScreen) {
+        lv_obj_del_async(m_bmsDataScreen);
+        m_bmsDataScreen = nullptr;
+    }
+    if (m_canScreen) {
+        lv_obj_del_async(m_canScreen);
+        m_canScreen = nullptr;
+    }
+    if (m_rs485Screen) {
+        lv_obj_del_async(m_rs485Screen);
+        m_rs485Screen = nullptr;
+    }
+    if (m_mqttScreen) {
+        lv_obj_del_async(m_mqttScreen);
+        m_mqttScreen = nullptr;
+    }
+    if (m_wlanScreen) {
+        lv_obj_del_async(m_wlanScreen);
+        m_wlanScreen = nullptr;
+    }
+    if (m_displayScreen) {
+        lv_obj_del_async(m_displayScreen);
+        m_displayScreen = nullptr;
+    }
     
     // Neu erstellen
     createAllScreens();
