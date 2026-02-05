@@ -33,7 +33,9 @@ void setup()
         // Halt execution - system cannot continue without PSRAM
         esp_deep_sleep_start();
     }
-    Serial.printf("PSRAM found: %d bytes total, %d bytes free\n", ESP.getPsramSize(), ESP.getFreePsram());
+    Serial.println("========================================");
+    Serial.printf("PSRAM OK: %d bytes total, %d bytes free\n", ESP.getPsramSize(), ESP.getFreePsram());
+    Serial.println("========================================");
 
     Serial.println("Initializing board");
     Board *board = new Board();
