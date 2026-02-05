@@ -30,9 +30,8 @@ void setup()
         Serial.println("Without PSRAM, LCD initialization will fail!");
         Serial.println("See README.md for complete setup instructions.");
         Serial.println("========================================");
-        while(1) {
-            delay(1000);
-        }
+        // Halt execution - system cannot continue without PSRAM
+        esp_deep_sleep_start();
     }
     Serial.printf("PSRAM found: %d bytes total, %d bytes free\n", ESP.getPsramSize(), ESP.getFreePsram());
 

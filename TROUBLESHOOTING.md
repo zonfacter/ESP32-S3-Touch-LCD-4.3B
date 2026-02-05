@@ -20,7 +20,7 @@ E (1163) lcd_panel.rgb: esp_lcd_new_rgb_panel(353): alloc frame buffers failed
 **Siehe auch**: [Issue #5](https://github.com/zonfacter/ESP32-S3-Touch-LCD-4.3B/issues/5)
 
 ### Ursache
-⚠️ **In 99% der Fälle**: PSRAM wurde in Arduino IDE nicht aktiviert!
+⚠️ **In den meisten Fällen**: PSRAM wurde in Arduino IDE nicht aktiviert!
 
 Der ESP32-S3 hat nicht genügend Arbeitsspeicher für die LCD-Frame-Buffer. Das 800×480 RGB Display benötigt große Speicherbereiche, die nur im externen PSRAM verfügbar sind.
 
