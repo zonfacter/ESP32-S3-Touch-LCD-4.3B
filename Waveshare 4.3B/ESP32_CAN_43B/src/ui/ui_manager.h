@@ -853,41 +853,61 @@ void UIManager::applyTheme() {
     lvgl_port_lock(-1);
     
     // LVGL Theme anwenden
-    lv_theme_t* theme;
-    
-    if (m_themeDark) {
-        // Dark Theme
-        theme = lv_theme_default_init(
-            lv_disp_get_default(),
-            lv_palette_main(LV_PALETTE_BLUE),      // Primary Color
-            lv_palette_main(LV_PALETTE_RED),       // Secondary Color
-            true,                                    // Dark mode = true
-            LV_FONT_DEFAULT
-        );
-    } else {
-        // Light Theme
-        theme = lv_theme_default_init(
-            lv_disp_get_default(),
-            lv_palette_main(LV_PALETTE_BLUE),      // Primary Color
-            lv_palette_main(LV_PALETTE_RED),       // Secondary Color
-            false,                                   // Dark mode = false
-            LV_FONT_DEFAULT
-        );
+    lv_disp_t* disp = lv_disp_get_default();
+    if (!disp) {
+        Serial.println("[UI] ERROR: No LVGL display initialized. Cannot apply theme change");
+        lvgl_port_unlock();
+        return;
     }
     
-    lv_disp_set_theme(lv_disp_get_default(), theme);
+    lv_theme_t* theme = lv_theme_default_init(
+        disp,
+        lv_palette_main(LV_PALETTE_BLUE),      // Primary Color
+        lv_palette_main(LV_PALETTE_RED),       // Secondary Color
+        m_themeDark,                             // Dark mode flag
+        LV_FONT_DEFAULT
+    );
+    
+    if (!theme) {
+        Serial.println("[UI] ERROR: Theme initialization failed");
+        lvgl_port_unlock();
+        return;
+    }
+    
+    lv_disp_set_theme(disp, theme);
     
     // Alle Screens neu laden damit Theme wirksam wird
     Screen currentScreen = m_currentScreen;
     
     // Screens neu erstellen mit neuem Theme
-    if (m_mainScreen) lv_obj_del(m_mainScreen);
-    if (m_bmsDataScreen) lv_obj_del(m_bmsDataScreen);
-    if (m_canScreen) lv_obj_del(m_canScreen);
-    if (m_rs485Screen) lv_obj_del(m_rs485Screen);
-    if (m_mqttScreen) lv_obj_del(m_mqttScreen);
-    if (m_wlanScreen) lv_obj_del(m_wlanScreen);
-    if (m_displayScreen) lv_obj_del(m_displayScreen);
+    if (m_mainScreen) {
+        lv_obj_del_async(m_mainScreen);
+        m_mainScreen = nullptr;
+    }
+    if (m_bmsDataScreen) {
+        lv_obj_del_async(m_bmsDataScreen);
+        m_bmsDataScreen = nullptr;
+    }
+    if (m_canScreen) {
+        lv_obj_del_async(m_canScreen);
+        m_canScreen = nullptr;
+    }
+    if (m_rs485Screen) {
+        lv_obj_del_async(m_rs485Screen);
+        m_rs485Screen = nullptr;
+    }
+    if (m_mqttScreen) {
+        lv_obj_del_async(m_mqttScreen);
+        m_mqttScreen = nullptr;
+    }
+    if (m_wlanScreen) {
+        lv_obj_del_async(m_wlanScreen);
+        m_wlanScreen = nullptr;
+    }
+    if (m_displayScreen) {
+        lv_obj_del_async(m_displayScreen);
+        m_displayScreen = nullptr;
+    }
     
     // Neu erstellen
     createAllScreens();
